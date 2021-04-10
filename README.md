@@ -6,7 +6,8 @@ Window switches are received using a hook from pywin32, data is stored in a Pand
 
 ## Windows Installation
 
-Go to releases and download the latest version.
+Go to releases and download and extract the latest version. Then, run the 'WinSwitchCtr' executable.
+
 Alternatively, you can download the repo and run it for yourself.
 
 ## Mac version
