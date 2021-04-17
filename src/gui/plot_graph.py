@@ -56,23 +56,29 @@ class MainWindow(QtWidgets.QMainWindow):
         # get the occ list and update data
         self.occ_list = occ_list
         self.data = self.occ_list.get_occ_list()
-        self.update_window()
+        self.update_graph()
 
-        # setup a timer to trigger the redraw by calling update_window
+        # setup occ_list to trigger the graph redraw every switch
+        self.occ_list.set_update_graph(self.update_graph)
+
+        # setup a timer to trigger the stats redraw
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(500)  # redraws every half second (lower to reduce jerkyness when moving window)
-        self.timer.timeout.connect(self.update_window)
+        self.timer.setInterval(250)  # redraws every quarter second (increase to reduce jerkyness when moving window)
+        self.timer.timeout.connect(self.update_stats)
         self.timer.start()
 
-    def update_window(self):
-        # get and init data
-        self.data = self.occ_list.get_occ_list()
+    def update_stats(self):
         curr_ttl_cnt = self.occ_list.get_curr_cnt()
         curr_cnt_per_min = 0
         if curr_ttl_cnt != 0:
             curr_cnt_per_min = curr_ttl_cnt / self.occ_list.get_session_run_time_in_minutes()
         self.sessionInformation.setText('Statistics:\n This session:\n  Total number of switches:\n  %d\n\n  Switches '
                                         'per minute:\n   %f' % (curr_ttl_cnt, curr_cnt_per_min))
+
+    def update_graph(self):
+        # get and init data
+        self.data = self.occ_list.get_occ_list()
+
         # clear the canvas
         self.canvas.axes.cla()
         top_lim = self.occ_list.get_max_cnt()
@@ -99,5 +105,5 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # overrides show to fix edge case bug with window scaling
     def show(self):
-        self.resize(1003, 620)
         QtWidgets.QMainWindow.show(self)
+        self.resize(1003, 620)

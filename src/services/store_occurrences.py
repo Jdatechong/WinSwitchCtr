@@ -10,6 +10,7 @@ def round_datetime_to_minute(dt):
 
 class Occurrences:
     def __init__(self):
+        self.update_graph = (lambda: print('should not enter'))
         now_datetime = datetime.datetime.now()
         now_floored = round_datetime_to_minute(now_datetime)
         self.curr_occ_list = pd.DataFrame({'Datetime': [now_floored], 'Cnt': [0]})
@@ -17,9 +18,11 @@ class Occurrences:
         self.last_date_added = now_floored
         self.session_begin_datetime = now_datetime
         self.max_cnt = 0
-        # print(f'current occ list:\n {self.curr_occ_list}')
         self.session_cnt = 0
         self.schedule_task_on_minute()
+
+    def set_update_graph(self, update_func):
+        self.update_graph = update_func
 
     def schedule_task_on_minute(self):
         # print('scheduling tasks')
@@ -30,6 +33,7 @@ class Occurrences:
             return self.add_new_date_entry(entry_offset=datetime.timedelta(minutes=1))
 
         sched.add_job(job_function, 'cron', day_of_week='mon-sun', hour='0-23', minute='0-59', second='58')
+
 
     def increment_count(self):
         now_floored = round_datetime_to_minute(datetime.datetime.now())
@@ -43,8 +47,8 @@ class Occurrences:
             self.curr_occ_list.at[now_floored, "Cnt"] = 1
             if self.max_cnt < 1:
                 self.max_cnt = 0
-        # print(self.curr_occ_list)
         self.session_cnt = self.session_cnt + 1
+        self.update_graph()
 
     def get_occ_list(self):
         return self.curr_occ_list
@@ -56,7 +60,7 @@ class Occurrences:
         now_floored = round_datetime_to_minute(datetime.datetime.now() + entry_offset)
         if now_floored not in self.curr_occ_list.index:
             self.curr_occ_list.at[now_floored, "Cnt"] = 0
-
+        self.update_graph()
         return
 
     def get_curr_cnt(self):
